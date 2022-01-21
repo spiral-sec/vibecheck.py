@@ -1,1 +1,2 @@
 colorama==0.4.4
+staticx==0.13.6
