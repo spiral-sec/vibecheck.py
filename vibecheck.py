@@ -73,3 +73,17 @@ Command("ls /tmp/ssh* 2>dev/null",
 Command("screen -ls 2>/dev/null", "Screen active socket").run()
 Command("tmux ls 2>/dev/null", "Tmux active socket").run()
 
+Command("find / \( -wholename '/home'homedir*' -prune \) \
+        -o \( -type d -perm -0002) -exec ls -ld '{}' ';' \
+        2>/dev/null| grep root",
+        "Writable directories for root group").run()
+Command("find / \( -wholename '/home/homedir/*' -prune -o \
+        -wholename '/proc/*' -prune \) -o \( -type f -perm -0002 \) \
+        -exec ls -l '{}' ';' 2>/dev/null",
+        "Writable directories for users group").run()
+Command("find / \( -perm -2000 -o -perm -4000 \) -exec ls -ld {} \; 2>/dev/null",
+        "SUID/SGID files and directories").run()
+Command("ls -ahlR /root 2>/dev/null", "/root folder content").run()
+Command("getcap -r  / 2> /dev/null", "Checking capabilities").run()
+
+
