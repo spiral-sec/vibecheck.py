@@ -85,5 +85,17 @@ Command("find / \( -perm -2000 -o -perm -4000 \) -exec ls -ld {} \; 2>/dev/null"
         "SUID/SGID files and directories").run()
 Command("ls -ahlR /root 2>/dev/null", "/root folder content").run()
 Command("getcap -r  / 2> /dev/null", "Checking capabilities").run()
+Command("find /var/log -name '*.log' 2>/dev/null | \
+        xargs -l10 egrep 'pwd|password' 2>/dev/null",
+        "Logs containing 'password'").run()
 
+print(f'\n{Fore.YELLOW}[*] Current processes info{Style.RESET_ALL}')
+Command("ps aux | awk '{print($1,$2,$9,$10,$11)}'", "Running processes").run()
+Command("sudo -V | grep version 2>/dev/null", "Sudo version").run()
+Command("apache2 -v; apache2ctl -M; httpd -v; apachectl -l 2>/dev/null",
+        "Apache version").run()
+Command("cat /etc/apache2/apache2.conf 2>/dev/null", "Apache config").run()
 
+print(f'\n{Fore.YELLOW}[*] Other priv-esc vectors{Style.RESET_ALL}')
+Command("which awk perl python ruby gcc cc vi vim nmap find netcat nc wget \
+        tftp ftp 2>/dev/null", "local installed exploit tools").run()
