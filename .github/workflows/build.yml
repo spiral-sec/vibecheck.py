@@ -1,0 +1,17 @@
+name: Code Quality
+
+on: push
+jobs:
+  run-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install dependencies
+      run: |
+        sudo apt install python3.9-venv
+
+    - name: build binary
+      run: |
+        ./compile.sh
+
