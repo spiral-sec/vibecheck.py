@@ -14,5 +14,4 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - run: |
-      ./compile.sh
+    - run: ./compile.sh
