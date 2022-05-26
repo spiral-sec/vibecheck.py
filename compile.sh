@@ -15,11 +15,11 @@ fcomp() {
 }
 
 check_python_version () {
-    [ -f ${PY_PATH} ] || { echo "Could not find Python path" && exit 1; }
+    [ -f "${PY_PATH}" ] || { echo "Could not find Python path" && exit 1; }
     PYTHON_VERSION=$(${PY_PATH} --version | cut -d' ' -f2- - | cut -d'.' -f1-2 -)
 
     echo "[+] Python installation: ${PY_PATH} [${PYTHON_VERSION}]"
-    if fcomp ${PYTHON_VERSION} ${SUPPORTED_VERSION}; then
+    if fcomp "${PYTHON_VERSION}" "${SUPPORTED_VERSION}"; then
         echo "[!] Unsupported version."
         echo "        Currently supported version: ${SUPPORTED_VERSION}"
         echo "        Current Python version: ${PYTHON_VERSION}"
@@ -41,19 +41,27 @@ install_pip_packages () {
 }
 
 
+cleanup () {
+    rm -vrf vibecheck.spec build vibecheck
+
+    mv dist/vibecheck .
+    rm -vrf dist
+}
+
 compile () {
     OUTPATH="dist/vibecheck"
     TARGET="vibecheck"
     LINUX_DYN_LIB="/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2"
 
-    pyinstaller -F ${SOURCES} && staticx --strip -l ${LINUX_DYN_LIB} ${OUTPATH} ${TARGET} >/dev/null
+    pyinstaller -F "${SOURCES[@]}" >/dev/null \
+        && staticx --strip -l "${LINUX_DYN_LIB}" "${OUTPATH}" "${TARGET}" >/dev/null
 }
 
-if [[ -d ${VENV_PATH} ]]; then
+if [[ -d "${VENV_PATH}" ]]; then
         source ${VENV_PATH}/bin/activate
     else
         install_pip_packages
 fi
 
-compile
+compile && cleanup
 

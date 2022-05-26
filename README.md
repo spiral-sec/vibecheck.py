@@ -5,7 +5,7 @@ It is useful for your red-teams assignements, TryHackMe/HackTheBox rooms.
 
 ## How to compile
 
-After running `./compile.sh`, you should find your statically built binary in `./dist/vibecheck`
+After running `./compile.sh`, you should find your statically built binary at the root of the repository.
 
 ## How to run
 
