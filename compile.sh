@@ -28,8 +28,8 @@ compile () {
     TARGET="vibecheck"
     LINUX_DYN_LIB="/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2"
 
-    pyinstaller -F "${SOURCES[@]}" >/dev/null \
-        && staticx --strip -l "${LINUX_DYN_LIB}" "${OUTPATH}" "${TARGET}" >/dev/null
+    pyinstaller -F "${SOURCES[@]}" >/dev/null || true
+    staticx --strip -l "${LINUX_DYN_LIB}" "${OUTPATH}" "${TARGET}" >/dev/null || true
 }
 
 if [[ -d "${VENV_PATH}" ]]; then
