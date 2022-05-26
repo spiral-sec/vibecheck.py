@@ -5,10 +5,7 @@ It is useful for your red-teams assignements, TryHackMe/HackTheBox rooms.
 
 ## How to compile
 
-Install `python3.9-venv` because the compile script relies on it.
-Then, just type `./compile.sh` in the main repository directory.
-
-You should find your binary in `./dist`
+After running `./compile.sh`, you should find your statically built binary in `./dist/vibecheck`
 
 ## How to run
 
