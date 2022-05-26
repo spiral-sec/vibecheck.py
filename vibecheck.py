@@ -4,9 +4,14 @@
 # If Python3 is not installed, you can use this script:
 # https://github.com/cervoise/linuxprivcheck/blob/master/linuxprivchecker3.py
 
-from colorama import Fore, Style
 import subprocess as s
 import sys
+
+class Color:
+    YELLOW = '\033[0;33m'
+    GREEN = '\033[0;32m'
+    RED = '\033[0;31m'
+    RESET_ALL = '\033[0m'
 
 class Command:
     def __init__(self, command: str, comment: str, alternative: str = ''):
@@ -28,35 +33,35 @@ class Command:
     def run(self):
         self.output = self.run_command_wrapper()
         if self.output == '':
-            print(f'{Fore.RED} [-] Not output for {self.comment}{Style.RESET_ALL}')
+            print(f'{Color.RED} [-] Not output for {self.comment}{Color.RESET_ALL}')
         else:
-            print(f'{Fore.GREEN} [+] {self.comment}:\n{Style.RESET_ALL}{self.output}')
+            print(f'{Color.GREEN} [+] {self.comment}:\n{Color.RESET_ALL}{self.output}')
 
 
 #################################
 ######### ENUMERATION ###########
 #################################
 
-print(f'{Fore.YELLOW}[*] System Info{Style.RESET_ALL}')
+print(f'{Color.YELLOW}[*] System Info{Color.RESET_ALL}')
 Command("hostnamectl | grep 'Operating System | cut -d : -f 2'", "Operating System").run()
 Command("cat /proc/version", "Kernel version").run()
 Command("hostname", "Hostname").run()
 
-print(f'\n{Fore.YELLOW}[*] Network Info{Style.RESET_ALL}')
+print(f'\n{Color.YELLOW}[*] Network Info{Color.RESET_ALL}')
 Command("/sbin/ifconfig -a", "Network Interfaces", "ip address show").run()
 Command("route", "Route", "ip route").run()
 Command("netstat -antup | grep -v 'TIME_WAIT'", "Network status", "ss -lut | grep -v 'TIME_WAIT'").run()
 
-print(f'\n{Fore.YELLOW}[*] Filesystem Info{Style.RESET_ALL}')
+print(f'\n{Color.YELLOW}[*] Filesystem Info{Color.RESET_ALL}')
 Command("mount", "mount output").run()
 Command("cat /etc/fstab 2>/dev/null", "fstab entries").run()
 
-print(f'\n{Fore.YELLOW}[*] Cron jobs{Style.RESET_ALL}')
+print(f'\n{Color.YELLOW}[*] Cron jobs{Color.RESET_ALL}')
 Command("ls -la /etc/cron* 2>/dev/null", "Scheduled cron jobs").run()
 Command("ls -laR /etc/cron 2>/dev/null | awk '$1 ~ /w.$/' 2>/dev/null", "Writable cron jobs").run()
 
 
-print(f'\n{Fore.YELLOW}[*] Current user info{Style.RESET_ALL}')
+print(f'\n{Color.YELLOW}[*] Current user info{Color.RESET_ALL}')
 Command("whoami", "Current user").run()
 Command("sudo -l", "Sudo configuration").run()
 Command("doas -l", "Doas configuration").run()
@@ -72,7 +77,7 @@ Command("screen -ls 2>/dev/null", "Screen active socket").run()
 Command("tmux ls 2>/dev/null", "Tmux active socket").run()
 
 
-print(f'\n{Fore.YELLOW}[*] Programs information{Style.RESET_ALL}')
+print(f'\n{Color.YELLOW}[*] Programs information{Color.RESET_ALL}')
 Command("find / -perm -u=s -type f 2>/dev/null", "Check if there is programs with special perms").run()
 Command("find / \( -wholename '/home'homedir*' -prune \) \
         -o \( -type d -perm -0002) -exec ls -ld '{}' ';' \
@@ -90,12 +95,12 @@ Command("find /var/log -name '*.log' 2>/dev/null | \
         xargs -l10 egrep 'pwd|password' 2>/dev/null",
         "Logs containing 'password'").run()
 
-print(f'\n{Fore.YELLOW}[*] Current processes info{Style.RESET_ALL}')
+print(f'\n{Color.YELLOW}[*] Current processes info{Color.RESET_ALL}')
 Command("ps aux | awk '{print($1,$2,$9,$10,$11)}'", "Running processes").run()
 Command("sudo -V | grep version 2>/dev/null", "Sudo version").run()
 Command("apache2 -v; apache2ctl -M; httpd -v; apachectl -l 2>/dev/null", "Apache version").run()
 Command("cat /etc/apache2/apache2.conf 2>/dev/null", "Apache config").run()
 
-print(f'\n{Fore.YELLOW}[*] Other priv-esc vectors{Style.RESET_ALL}')
+print(f'\n{Color.YELLOW}[*] Other priv-esc vectors{Color.RESET_ALL}')
 Command("which awk perl python ruby gcc cc vi vim nmap find netcat nc wget \
         tftp ftp 2>/dev/null", "local installed exploit tools").run()
