@@ -26,9 +26,7 @@ class Command:
 
     def run_command_wrapper(self) -> str:
         output = self.popen(self.command)
-        if output == '' and self.alternative != '':
-            output = self.popen(self.alternative)
-        return output
+        return self.popen(self.alternative) if output == '' and self.alternative != '' else output
 
     def run(self):
         self.output = self.run_command_wrapper()
