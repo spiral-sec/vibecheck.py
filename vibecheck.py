@@ -14,13 +14,13 @@ class Color:
     RESET_ALL = '\033[0m'
 
 class Command:
-    def __init__(self, command: str, comment: str, alternative: str = ''):
+    def __init__(self, command, comment, alternative=''):
         self.command = command
         self.comment = comment
         self.alternative = alternative
         self.output = ''
 
-    def popen(self, command: str) -> str:
+    def popen(self, command):
         out, _ = s.Popen([command], stdout=s.PIPE, stderr=s.PIPE, shell=True).communicate()
         return out.decode('utf-8').strip()
 
