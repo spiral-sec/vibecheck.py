@@ -1,4 +1,4 @@
-#!/bin/python3.10
+#!/bin/python3
 
 # For simplicity reasons, this script will only run with Python3.
 # If Python3 is not installed, you can use this script:
